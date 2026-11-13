@@ -16,6 +16,9 @@ const onResize = (cb: () => void) => {
   return () => window.removeEventListener("resize", cb);
 };
 const useColumns = () => useSyncExternalStore(onResize, colsNow, () => 2);
+// phones & tablets: touch screen or narrow window
+const isTouchNow = () => window.matchMedia("(pointer: coarse), (max-width: 767px)").matches;
+const useIsTouch = () => useSyncExternalStore(onResize, isTouchNow, () => false);
 
 const MAX_STRETCH = 0.35; // in column widths (~1/3 of a tile)
 const GAP = 0.045; // the 16px gap, roughly, in column widths
@@ -190,7 +193,7 @@ function FilmFrame({ item, children }: { item: WorkItem; children: React.ReactNo
   );
 }
 
-function SiteVideo({ item }: { item: WorkItem }) {
+function SiteVideo({ item, src }: { item: WorkItem; src?: string }) {
   const video = useRef<HTMLVideoElement>(null);
   const [state, setState] = useState<"idle" | "loading" | "playing" | "paused" | "error">("loading");
 
@@ -219,9 +222,15 @@ function SiteVideo({ item }: { item: WorkItem }) {
         onError={() => setState("error")}
         className="absolute inset-0 size-full bg-black"
       >
-        {/* browser picks the first source it can decode: the original, else the H.264 copy */}
-        <source src={item.src} type={item.codec === "hevc" ? 'video/mp4; codecs="hvc1"' : "video/mp4"} />
-        {item.fallback && <source src={item.fallback} type="video/mp4" onError={() => setState("error")} />}
+        {src ? (
+          <source src={src} type="video/mp4" />
+        ) : (
+          <>
+            {/* browser picks the first source it can decode: the original, else the H.264 copy */}
+            <source src={item.src} type={item.codec === "hevc" ? 'video/mp4; codecs="hvc1"' : "video/mp4"} />
+            {item.fallback && <source src={item.fallback} type="video/mp4" onError={() => setState("error")} />}
+          </>
+        )}
       </video>
 
       {state === "idle" && (
@@ -262,6 +271,7 @@ function SiteVideo({ item }: { item: WorkItem }) {
 
 function Viewer({ list, index, onClose, onStep }: { list: WorkItem[]; index: number; onClose: () => void; onStep: (d: number) => void }) {
   const item = list[index];
+  const isTouch = useIsTouch();
   const touch = useRef<{ x: number; y: number } | null>(null);
   const root = useRef<HTMLDivElement>(null);
 
@@ -344,7 +354,9 @@ function Viewer({ list, index, onClose, onStep }: { list: WorkItem[]; index: num
       </div>
 
       <div className="relative flex min-h-0 flex-1 items-center justify-center px-4 pb-2 md:px-20 md:pb-6" onClick={(e) => e.target === e.currentTarget && onClose()}>
-        {item.type === "video" && item.player === "drive" ? (
+        {item.type === "video" && item.player === "drive" && isTouch && item.mobile ? (
+          <SiteVideo key={item.id} item={item} src={item.mobile} />
+        ) : item.type === "video" && item.player === "drive" ? (
           <DriveVideo key={item.id} item={item} />
         ) : item.type === "video" ? (
           <SiteVideo key={item.id} item={item} />

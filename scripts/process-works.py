@@ -163,6 +163,14 @@ def do_video(src, dst_base, drive_id=None):
     if fallback and not os.path.exists(fallback):
         ff("-i", src, "-c:v", "libx264", "-preset", "slow", "-crf", "18", "-pix_fmt", "yuv420p",
            "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", fallback)
+    mobile = dst_base + "-mobile.mp4"
+    if hosted and not os.path.exists(mobile):
+        # Phones: a 1080p H.264 copy (looks the same as the original on a phone screen, ~1/5 the
+        # size) played in the phone's own clean player — Drive's embedded player covers the video
+        # with its controls on touch screens. Short side capped at 1080, original frame rate kept.
+        scale = "scale='if(gt(iw,ih),-2,min(1080,iw))':'if(gt(iw,ih),min(1080,ih),-2)'"
+        ff("-i", src, "-vf", scale, "-c:v", "libx264", "-preset", "slow", "-crf", "24", "-profile:v", "high",
+           "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "128k", "-movflags", "+faststart", mobile)
     start = f"{min(dur * 0.2, 8):.2f}" if dur > 6 else "0"
     if not os.path.exists(prev):  # grid hover loop only
         small = "scale='if(gt(iw,ih),min(720,iw),-2)':'if(gt(iw,ih),-2,min(720,ih))'"
@@ -187,7 +195,7 @@ def do_video(src, dst_base, drive_id=None):
         # src = Drive's own player (always works). With a Drive API key the site streams the
         # untouched original from the API instead and keeps this as the fallback.
         info.update(src=f"https://drive.google.com/file/d/{drive_id}/preview", player="drive", driveId=drive_id,
-                    codec="hevc" if codec in ("hevc", "h265") else "h264")
+                    codec="hevc" if codec in ("hevc", "h265") else "h264", mobile=mobile)
     else:
         info.update(src=mp4, codec="hevc" if fallback else "h264", original=True)
         if fallback:
@@ -243,7 +251,7 @@ def main():
 
     pub = os.path.dirname(os.path.abspath(OUT))
     for it in items:
-        for k in ("src", "thumb", "thumbXs", "preview", "poster", "posterSm", "posterXs", "card", "fallback"):
+        for k in ("src", "thumb", "thumbXs", "preview", "poster", "posterSm", "posterXs", "card", "fallback", "mobile"):
             if k in it and not it[k].startswith("http"):
                 it[k] = "/" + os.path.relpath(os.path.abspath(it[k]), pub).replace(os.sep, "/")
         base = it.pop("_base")  # local output path without extension, e.g. public/work/menu/x

@@ -16,6 +16,7 @@ export type WorkItem = {
   card?: string; // ~1000px webp for the "Selected reels" cards
   fallback?: string; // H.264 copy for browsers that can't play the original codec
   player?: "drive"; // src is a Google Drive preview URL — played in Drive's own player
+  mobile?: string; // 1080p H.264 copy played on phones in the native player (Drive's covers the video)
   driveId?: string; // Drive file id — with NEXT_PUBLIC_DRIVE_API_KEY the original streams via the Drive API
   codec?: "h264" | "hevc";
   original?: boolean; // true = the untouched master file
