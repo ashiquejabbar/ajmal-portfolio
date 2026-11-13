@@ -46,7 +46,7 @@ export default function FloatingContact() {
 
   return (
     <div
-      className={`fixed right-4 bottom-4 z-[60] transition-all duration-700 ease-[var(--ease-out)] md:right-8 md:bottom-8 ${
+      className={`fixed right-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-[60] transition-all duration-700 ease-[var(--ease-out)] md:right-8 md:bottom-8 ${
         show ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-8 opacity-0"
       }`}
       aria-hidden={!show}
