@@ -181,7 +181,10 @@ def do_video(src, dst_base, drive_id=None):
     info = {"type": "video", "w": w, "h": h, "duration": round(dur, 1), "preview": prev, "poster": poster,
             "posterSm": poster_sm, "posterXs": poster_xs, "card": poster_card, "_base": dst_base}
     if hosted:
-        info.update(src=f"https://drive.google.com/file/d/{drive_id}/preview", player="drive")
+        # src = Drive's own player (always works). With a Drive API key the site streams the
+        # untouched original from the API instead and keeps this as the fallback.
+        info.update(src=f"https://drive.google.com/file/d/{drive_id}/preview", player="drive", driveId=drive_id,
+                    codec="hevc" if codec in ("hevc", "h265") else "h264")
     else:
         info.update(src=mp4, codec="hevc" if fallback else "h264", original=True)
         if fallback:

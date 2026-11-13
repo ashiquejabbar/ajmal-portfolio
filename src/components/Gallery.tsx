@@ -128,6 +128,52 @@ function Tile({ item, onOpen, fill = false }: { item: WorkItem; onOpen: () => vo
   );
 }
 
+// Google Drive API key (free, restricted to this site's address). With it, Drive-hosted films stream
+// as the untouched original file in the site's own player; without it, Drive's player is used.
+const DRIVE_KEY = process.env.NEXT_PUBLIC_DRIVE_API_KEY;
+const driveOriginal = (id: string) => `https://www.googleapis.com/drive/v3/files/${id}?alt=media&key=${DRIVE_KEY}`;
+
+function DriveVideo({ item }: { item: WorkItem }) {
+  // HEVC originals don't play in every browser — only try the original stream for H.264
+  const canStream = !!DRIVE_KEY && !!item.driveId && item.codec !== "hevc";
+  const [useIframe, setUseIframe] = useState(!canStream); // fresh per film: the viewer keys this by item id
+
+  return (
+    <div className="pointer-events-none flex size-full items-center justify-center [container-type:size]">
+      <div
+        className="pointer-events-auto relative bg-black"
+        style={{ aspectRatio: `${item.w} / ${item.h}`, width: `min(100cqw, calc(100cqh * ${item.w / item.h}))` }}
+      >
+        {/* poster shows while the stream / Drive's player loads */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={item.posterSm ?? item.poster} alt="" aria-hidden className="absolute inset-0 size-full object-cover opacity-60" />
+        {useIframe ? (
+          <iframe
+            key={item.id}
+            src={item.src}
+            title={`${item.title || item.category} — video`}
+            allow="autoplay; fullscreen; picture-in-picture"
+            allowFullScreen
+            className="absolute inset-0 size-full border-0"
+          />
+        ) : (
+          <video
+            key={item.id}
+            src={driveOriginal(item.driveId!)}
+            poster={item.poster}
+            controls
+            autoPlay
+            playsInline
+            preload="metadata"
+            onError={() => setUseIframe(true)} // quota / blocked / unsupported -> Drive's player
+            className="absolute inset-0 size-full bg-black"
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
 function Viewer({ list, index, onClose, onStep }: { list: WorkItem[]; index: number; onClose: () => void; onStep: (d: number) => void }) {
   const item = list[index];
   const touch = useRef<number | null>(null);
@@ -197,25 +243,7 @@ function Viewer({ list, index, onClose, onStep }: { list: WorkItem[]; index: num
 
       <div className="relative flex min-h-0 flex-1 items-center justify-center px-4 pb-2 md:px-20 md:pb-6" onClick={(e) => e.target === e.currentTarget && onClose()}>
         {item.type === "video" && item.player === "drive" ? (
-          // Google Drive's player, sized to the film's own shape inside the available space
-          <div className="pointer-events-none flex size-full items-center justify-center [container-type:size]">
-            <div
-              className="pointer-events-auto relative bg-black"
-              style={{ aspectRatio: `${item.w} / ${item.h}`, width: `min(100cqw, calc(100cqh * ${item.w / item.h}))` }}
-            >
-              {/* poster shows while Drive's player loads */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={item.posterSm ?? item.poster} alt="" aria-hidden className="absolute inset-0 size-full object-cover opacity-60" />
-              <iframe
-                key={item.id}
-                src={item.src}
-                title={`${item.title || item.category} — video`}
-                allow="autoplay; fullscreen; picture-in-picture"
-                allowFullScreen
-                className="absolute inset-0 size-full border-0"
-              />
-            </div>
-          </div>
+          <DriveVideo key={item.id} item={item} />
         ) : item.type === "video" ? (
           <video key={item.id} poster={item.poster} controls autoPlay playsInline className="max-h-full max-w-full bg-black">
             {/* browser picks the first source it can decode: the original, else the H.264 copy */}
