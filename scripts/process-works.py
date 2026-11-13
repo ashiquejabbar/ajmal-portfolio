@@ -25,8 +25,11 @@ FF = imageio_ffmpeg.get_ffmpeg_exe()
 IMG = {".jpg", ".jpeg", ".png", ".webp"}
 VID = {".mp4", ".mov", ".m4v"}
 MAX_EDGE, MAX_BYTES = 4096, 15 * 1024 * 1024
-# Where full-length videos play from: "drive" = Google Drive's player (nothing big on the site),
-# "site" = untouched copies in public/work (needs a host with enough bandwidth).
+# Where full-length videos play from:
+#   "drive" = Google Drive's embedded player (default — nothing big on the site, no bandwidth cost;
+#             Drive re-compresses slightly and its controls sit over the video on phones)
+#   "site"  = untouched originals in public/work, played by the browser's own player (best
+#             quality, native controls on phones; uses the host's bandwidth)
 VIDEO_HOST = os.environ.get("VIDEO_HOST", "drive")
 
 ids_path = os.path.join(SRC, "_drive_ids.json")

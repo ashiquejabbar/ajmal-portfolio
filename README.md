@@ -27,18 +27,15 @@ python -I scripts/process-works.py ../works-source/drive public/work src/data/wo
 
 Re-running only processes new files.
 
-**Original-quality video:** add a free Google Drive API key as `NEXT_PUBLIC_DRIVE_API_KEY`
-(in `.env.local` locally, and in Netlify → Site configuration → Environment variables). The viewer
-then streams each untouched original from Drive in the site's own player, and falls back to
-Drive's player automatically if Google refuses a request. Create the key at
-console.cloud.google.com: enable **Google Drive API** → Credentials → API key → restrict it to your
-site's address (HTTP referrers) and to the Drive API only.
-
 **Full-length videos play from Google Drive** (Drive's player inside the site's viewer), so the
-site itself only ships thumbnails, posters and 6-second hover previews — light enough for
-Netlify's free plan. The Drive folder must stay shared as "Anyone with the link". To add a video:
-upload it to the Drive folder, then run steps 1 and 3 above. To serve untouched copies from the
-site instead (needs a host with plenty of bandwidth), run step 3 with `VIDEO_HOST=site`.
+site only ships thumbnails, posters and 6-second hover previews — light enough for Netlify's free
+plan. The Drive folder must stay shared as "Anyone with the link". To add a video: upload it to
+the Drive folder, then run steps 1 and 3 above.
+- Optional — original quality from Drive: add a free Google Drive API key as
+  `NEXT_PUBLIC_DRIVE_API_KEY` (`.env.local` locally, Netlify → Environment variables). The viewer
+  then streams the untouched originals in the site's own player, falling back to Drive's player.
+- Optional — originals from the site itself: run step 3 with `VIDEO_HOST=site` (each play then
+  uses 20–95 MB of the host's bandwidth).
 
 **Deploying (Netlify):** connect the repo; Netlify detects Next.js (build `npm run build`).
 Link previews / sitemap use Netlify's address automatically — once you have your own domain,

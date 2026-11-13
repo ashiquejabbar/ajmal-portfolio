@@ -137,46 +137,132 @@ function DriveVideo({ item }: { item: WorkItem }) {
   // HEVC originals don't play in every browser — only try the original stream for H.264
   const canStream = !!DRIVE_KEY && !!item.driveId && item.codec !== "hevc";
   const [useIframe, setUseIframe] = useState(!canStream); // fresh per film: the viewer keys this by item id
+  const [ready, setReady] = useState(false); // Drive's player shows black for ~2s while it boots
 
+  return (
+    <FilmFrame item={item}>
+      {/* poster + spinner while Drive's player loads, instead of a black box */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={item.posterSm ?? item.poster} alt="" aria-hidden className="absolute inset-0 size-full object-cover" />
+      {!ready && (
+        <span
+          className="pointer-events-none absolute top-1/2 left-1/2 size-12 -translate-1/2 animate-spin rounded-full border-2 border-white/30 border-t-white"
+          aria-label="Loading"
+        />
+      )}
+      {useIframe ? (
+        <iframe
+          src={item.src}
+          title={`${item.title || item.category} — video`}
+          allow="autoplay; fullscreen; picture-in-picture"
+          allowFullScreen
+          onLoad={() => setTimeout(() => setReady(true), 400)}
+          className={`absolute inset-0 size-full border-0 transition-opacity duration-500 ${ready ? "opacity-100" : "opacity-0"}`}
+        />
+      ) : (
+        <video
+          src={driveOriginal(item.driveId!)}
+          poster={item.poster}
+          controls
+          autoPlay
+          playsInline
+          preload="metadata"
+          onCanPlay={() => setReady(true)}
+          onError={() => setUseIframe(true)} // quota / blocked / unsupported -> Drive's player
+          className="absolute inset-0 size-full bg-black"
+        />
+      )}
+    </FilmFrame>
+  );
+}
+
+/** Fits a box of the film's own shape inside the available space (no letterbox, no overflow). */
+function FilmFrame({ item, children }: { item: WorkItem; children: React.ReactNode }) {
   return (
     <div className="pointer-events-none flex size-full items-center justify-center [container-type:size]">
       <div
         className="pointer-events-auto relative bg-black"
         style={{ aspectRatio: `${item.w} / ${item.h}`, width: `min(100cqw, calc(100cqh * ${item.w / item.h}))` }}
       >
-        {/* poster shows while the stream / Drive's player loads */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={item.posterSm ?? item.poster} alt="" aria-hidden className="absolute inset-0 size-full object-cover opacity-60" />
-        {useIframe ? (
-          <iframe
-            key={item.id}
-            src={item.src}
-            title={`${item.title || item.category} — video`}
-            allow="autoplay; fullscreen; picture-in-picture"
-            allowFullScreen
-            className="absolute inset-0 size-full border-0"
-          />
-        ) : (
-          <video
-            key={item.id}
-            src={driveOriginal(item.driveId!)}
-            poster={item.poster}
-            controls
-            autoPlay
-            playsInline
-            preload="metadata"
-            onError={() => setUseIframe(true)} // quota / blocked / unsupported -> Drive's player
-            className="absolute inset-0 size-full bg-black"
-          />
-        )}
+        {children}
       </div>
     </div>
   );
 }
 
+function SiteVideo({ item }: { item: WorkItem }) {
+  const video = useRef<HTMLVideoElement>(null);
+  const [state, setState] = useState<"idle" | "loading" | "playing" | "paused" | "error">("loading");
+
+  // try to start right away; phones that block it (iOS) get the big play button instead
+  useEffect(() => {
+    video.current?.play().catch(() => setState((s) => (s === "loading" ? "idle" : s)));
+  }, []);
+
+  const start = () => {
+    setState("loading");
+    video.current?.play().catch(() => setState("idle"));
+  };
+
+  return (
+    <FilmFrame item={item}>
+      <video
+        ref={video}
+        poster={item.poster}
+        controls={state !== "idle" && state !== "error"}
+        playsInline
+        preload="metadata"
+        onPlaying={() => setState("playing")}
+        onPause={() => setState((s) => (s === "error" ? s : "paused"))}
+        onWaiting={() => setState("loading")}
+        onCanPlay={() => setState((s) => (s === "loading" && video.current?.paused ? "paused" : s))}
+        onError={() => setState("error")}
+        className="absolute inset-0 size-full bg-black"
+      >
+        {/* browser picks the first source it can decode: the original, else the H.264 copy */}
+        <source src={item.src} type={item.codec === "hevc" ? 'video/mp4; codecs="hvc1"' : "video/mp4"} />
+        {item.fallback && <source src={item.fallback} type="video/mp4" onError={() => setState("error")} />}
+      </video>
+
+      {state === "idle" && (
+        <button onClick={start} className="absolute inset-0 grid place-items-center bg-black/20" aria-label={`Play ${item.title || "film"}`}>
+          <span className="grid size-20 place-items-center rounded-full bg-bone/95 text-ink shadow-2xl">
+            <svg viewBox="0 0 24 24" className="ml-1 size-8" fill="currentColor" aria-hidden>
+              <path d="M7 4.5v15l13-7.5z" />
+            </svg>
+          </span>
+        </button>
+      )}
+
+      {state === "loading" && (
+        <span
+          className="pointer-events-none absolute top-1/2 left-1/2 size-12 -translate-1/2 animate-spin rounded-full border-2 border-bone/25 border-t-bone"
+          aria-label="Loading"
+        />
+      )}
+
+      {state === "error" && (
+        <div className="absolute inset-0 grid place-items-center bg-black/70 p-6 text-center">
+          <p className="text-sm text-bone/80">
+            This film couldn’t load on this connection.
+            {item.drive && (
+              <>
+                <br />
+                <a href={item.drive} target="_blank" rel="noreferrer" className="mt-3 inline-block text-bone underline">
+                  Open the original ↗
+                </a>
+              </>
+            )}
+          </p>
+        </div>
+      )}
+    </FilmFrame>
+  );
+}
+
 function Viewer({ list, index, onClose, onStep }: { list: WorkItem[]; index: number; onClose: () => void; onStep: (d: number) => void }) {
   const item = list[index];
-  const touch = useRef<number | null>(null);
+  const touch = useRef<{ x: number; y: number } | null>(null);
   const root = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -208,19 +294,28 @@ function Viewer({ list, index, onClose, onStep }: { list: WorkItem[]; index: num
       aria-modal="true"
       aria-label={item.title || item.category}
       data-lenis-prevent
-      className="media-dark fixed inset-0 z-[95] flex flex-col bg-ink text-bone outline-none"
+      className="media-dark fixed inset-0 z-[95] flex flex-col overscroll-contain bg-ink text-bone outline-none [touch-action:pinch-zoom]"
       onTouchStart={(e) => {
-        // a drag on the video is the user scrubbing the seek bar, not a swipe to the next item
-        touch.current = (e.target as Element).closest("video") ? null : e.touches[0].clientX;
+        touch.current = null;
+        if (e.touches.length > 1) return; // pinch-zoom, not a swipe
+        const t = e.touches[0];
+        // the bottom strip of a video is its seek bar — dragging there scrubs, it doesn't swipe
+        const v = (e.target as Element).closest("video");
+        if (v && t.clientY > v.getBoundingClientRect().bottom - 72) return;
+        touch.current = { x: t.clientX, y: t.clientY };
       }}
       onTouchEnd={(e) => {
-        if (touch.current === null) return;
-        const dx = e.changedTouches[0].clientX - touch.current;
-        if (Math.abs(dx) > 50) onStep(dx < 0 ? 1 : -1);
+        const s = touch.current;
         touch.current = null;
+        if (!s) return;
+        const t = e.changedTouches[0];
+        const dx = t.clientX - s.x;
+        const dy = t.clientY - s.y;
+        // clearly sideways and long enough
+        if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) onStep(dx < 0 ? 1 : -1);
       }}
     >
-      <div className="flex items-center justify-between gap-4 px-4 py-4 font-mono text-[11px] tracking-[0.2em] text-bone/70 uppercase md:px-8">
+      <div className="flex items-center justify-between gap-3 px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 font-mono text-[11px] tracking-[0.2em] text-bone/70 uppercase md:px-8 md:py-4">
         <span className="truncate">
           {item.category}
           {item.group ? ` · ${item.group}` : ""}
@@ -235,8 +330,15 @@ function Viewer({ list, index, onClose, onStep }: { list: WorkItem[]; index: num
               Original ↗
             </a>
           )}
-          <button onClick={onClose} className="-m-3 p-3 text-bone hover:text-rec" aria-label="Close viewer">
-            Close ✕
+          <button
+            onClick={onClose}
+            className="grid size-11 place-items-center rounded-full border border-line text-base text-bone hover:text-rec md:-m-3 md:size-auto md:border-0 md:p-3 md:text-[11px]"
+            aria-label="Close viewer"
+          >
+            <span className="hidden md:inline">Close ✕</span>
+            <span className="md:hidden" aria-hidden>
+              ✕
+            </span>
           </button>
         </span>
       </div>
@@ -245,11 +347,7 @@ function Viewer({ list, index, onClose, onStep }: { list: WorkItem[]; index: num
         {item.type === "video" && item.player === "drive" ? (
           <DriveVideo key={item.id} item={item} />
         ) : item.type === "video" ? (
-          <video key={item.id} poster={item.poster} controls autoPlay playsInline className="max-h-full max-w-full bg-black">
-            {/* browser picks the first source it can decode: the original, else the H.264 copy */}
-            <source src={item.src} type={item.codec === "hevc" ? 'video/mp4; codecs="hvc1"' : "video/mp4"} />
-            {item.fallback && <source src={item.fallback} type="video/mp4" />}
-          </video>
+          <SiteVideo key={item.id} item={item} />
         ) : (
           // eslint-disable-next-line @next/next/no-img-element
           <img key={item.id} src={item.src} alt={item.title || item.category} className="max-h-full max-w-full object-contain" />
