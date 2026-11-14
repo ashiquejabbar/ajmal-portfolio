@@ -35,6 +35,16 @@ export type Project = {
 export const projects: Project[] = [
   {
     id: "01",
+    title: "Joy Alukkas",
+    category: "Jewellery · Brilliance Diamond Show",
+    blurb: "Event film for Joy Alukkas' Brilliance diamond jewellery show — the showroom, the collections, the guests and the team.",
+    tone: ["#3a1418", "#0c0809"],
+    image: "/work/jewellery/11123-card.webp",
+    video: "/work/jewellery/11123-preview.mp4",
+    work: "jewellery/11123",
+  },
+  {
+    id: "02",
     title: "Damac Chelsea",
     category: "Real Estate · Meridian Properties",
     blurb: "Presenter-led walkthrough of a luxury Dubai home — price, payment plan and lifestyle in under a minute.",
@@ -44,7 +54,7 @@ export const projects: Project[] = [
     work: "real-estate/damac-chelsea",
   },
   {
-    id: "02",
+    id: "03",
     title: "Chutney & Roll",
     category: "Food & Beverage · Event Reel",
     blurb: "Guest-night reel for a Dubai restaurant — the buffet, the room and real reactions from the table.",
@@ -54,7 +64,7 @@ export const projects: Project[] = [
     work: "fnb/reel",
   },
   {
-    id: "03",
+    id: "04",
     title: "PM Sports",
     category: "Fitness · Brand Story",
     blurb: "Moody gym film for a sportswear brand — product details, training and the “inspired by champions” line.",
@@ -64,7 +74,7 @@ export const projects: Project[] = [
     work: "fitness/pm-sports",
   },
   {
-    id: "04",
+    id: "05",
     title: "Anam",
     category: "Lifestyle · Yacht Shoot",
     blurb: "Golden-hour yacht shoot against the Dubai skyline — wind, water and movement for a client's feed.",
@@ -74,7 +84,7 @@ export const projects: Project[] = [
     work: "fitness/anam-client",
   },
   {
-    id: "05",
+    id: "06",
     title: "Mobile Clinic",
     category: "Pet Care · Pet Dreamland",
     blurb: "Advert for a mobile vet clinic and grooming van — the team, the fit-out and care at your door.",
@@ -84,7 +94,7 @@ export const projects: Project[] = [
     work: "pet-care/mobile-clinic-advertising-1",
   },
   {
-    id: "06",
+    id: "07",
     title: "Azerbaijan Holiday",
     category: "Travel · Meridian Travel & Tourism",
     blurb: "Client testimonial for a holiday package — an honest interview cut with destination footage.",

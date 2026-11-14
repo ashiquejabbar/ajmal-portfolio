@@ -31,7 +31,7 @@ export type WorkItem = {
 export const works = raw as WorkItem[];
 
 // Order the filter chips appear in (categories not listed go last).
-const ORDER = ["real-estate", "fnb", "menu", "fitness", "pet-care", "travel", "events", "birthdays"];
+const ORDER = ["jewellery", "real-estate", "fnb", "menu", "fitness", "pet-care", "travel", "events", "birthdays"];
 
 export const categories = Array.from(new Map(works.map((w) => [w.categorySlug, w.category])))
   .map(([slug, label]) => ({ slug, label, count: works.filter((w) => w.categorySlug === slug).length }))

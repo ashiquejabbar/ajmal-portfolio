@@ -45,6 +45,7 @@ CATEGORIES = {
     "travels": ("Travel", "travel"),
     "bday partys": ("Birthday Parties", "birthdays"),
     "pixieset": ("Events", "events"),
+    "joy alukkas": ("Jewellery", "jewellery"),
 }
 
 

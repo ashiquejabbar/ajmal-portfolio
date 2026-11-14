@@ -222,7 +222,7 @@ export default function Work() {
           </span>
         </h2>
         <p className="hidden max-w-[16rem] text-right text-sm text-bone/70 md:block">
-          Real estate, food, fitness and travel films. Hover a frame to preview, select it to watch in full quality.
+          Jewellery, real estate, food, fitness and travel films. Hover a frame to preview, select it to watch in full quality.
         </p>
       </div>
 
