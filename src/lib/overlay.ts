@@ -12,6 +12,13 @@ import type Lenis from "lenis";
  */
 let locks = 0;
 let lenis: Lenis | null = null;
+const lockListeners = new Set<(locked: boolean) => void>();
+
+/** Notified when the page becomes locked / unlocked (e.g. to pause background previews). */
+export function onLockChange(fn: (locked: boolean) => void) {
+  lockListeners.add(fn);
+  return () => lockListeners.delete(fn);
+}
 
 /** SmoothScroll registers its Lenis instance here (null on teardown). */
 export function setLenis(l: Lenis | null) {
@@ -26,6 +33,7 @@ export function lockPage(opts: { includeHeader?: boolean } = {}) {
   if (locks++ === 0) {
     lenis?.stop();
     document.documentElement.style.overflow = "hidden";
+    lockListeners.forEach((fn) => fn(true));
   }
   let released = false;
   return () => {
@@ -35,6 +43,7 @@ export function lockPage(opts: { includeHeader?: boolean } = {}) {
     if (--locks === 0) {
       lenis?.start();
       document.documentElement.style.overflow = "";
+      lockListeners.forEach((fn) => fn(false));
     }
   };
 }

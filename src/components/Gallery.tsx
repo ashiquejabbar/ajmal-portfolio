@@ -6,6 +6,7 @@ import { gsap, prefersReducedMotion, useGSAP } from "@/lib/gsap";
 import { allOrdered, categories, fmtDuration, works, type WorkItem } from "@/data/works";
 import { profile } from "@/data/site";
 import { lockPage } from "@/lib/overlay";
+import { registerAutoplay } from "@/lib/autoplay";
 
 const PAGE = 24;
 
@@ -67,10 +68,14 @@ function toColumns(items: WorkItem[], n: number, pool: WorkItem[]) {
 
 function Tile({ item, onOpen, fill = false }: { item: WorkItem; onOpen: () => void; fill?: boolean }) {
   const video = useRef<HTMLVideoElement>(null);
+  const frame = useRef<HTMLButtonElement>(null);
   const isVideo = item.type === "video";
+  // phones: the most central video tile plays its preview by itself (one at a time — lib/autoplay)
+  useEffect(() => registerAutoplay(video.current, frame.current), [item.preview]);
 
   return (
     <button
+      ref={frame}
       type="button"
       onClick={onOpen}
       onPointerEnter={(e) => e.pointerType === "mouse" && video.current?.play().catch(() => {})}
@@ -108,7 +113,7 @@ function Tile({ item, onOpen, fill = false }: { item: WorkItem; onOpen: () => vo
           loop
           playsInline
           preload="none"
-          className="absolute inset-0 size-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+          className="absolute inset-0 size-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100 data-[autoplay=on]:opacity-100"
         />
       )}
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-80 transition-opacity duration-500 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100" />

@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { gsap, prefersReducedMotion, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { profile, projects, type Project } from "@/data/site";
 import { openWork, works } from "@/data/works";
+import { registerAutoplay } from "@/lib/autoplay";
 import { scrollToTarget, useLenis } from "./SmoothScroll";
 
 type Q = (v: number) => void;
@@ -13,6 +14,8 @@ function Card({ p, index, onFocusCard }: { p: Project; index: number; onFocusCar
   const video = useRef<HTMLVideoElement>(null);
   // one reusable tween per property (quickTo) + a rect cached on enter — no per-move tween pile-up or layout reads
   const tilt = useRef<{ rx: Q; ry: Q; sx: Q; sy: Q; so: Q; r: DOMRect } | null>(null);
+  // phones: the card in the middle of the swipe row plays its preview by itself (lib/autoplay)
+  useEffect(() => registerAutoplay(video.current, card.current), [p.video]);
 
   const onEnter = (e: React.PointerEvent) => {
     const el = card.current;
@@ -89,7 +92,7 @@ function Card({ p, index, onFocusCard }: { p: Project; index: number; onFocusCar
                 loop
                 playsInline
                 preload="none"
-                className="absolute inset-0 size-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                className="absolute inset-0 size-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100 data-[autoplay=on]:opacity-100"
               />
             )}
             {!p.image && !p.video && (
@@ -239,6 +242,7 @@ export default function Work() {
       <p className="mb-4 px-4 font-mono text-[10px] tracking-[0.2em] text-mute uppercase md:hidden">Swipe to browse →</p>
       <div
         ref={track}
+        data-autoplay-row
         className="flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:gap-[4vw] md:px-8 motion-safe:md:w-max motion-safe:md:snap-none motion-safe:md:overflow-visible motion-safe:md:pb-0"
       >
         {projects.map((p, i) => (
