@@ -565,9 +565,14 @@ export default function Gallery() {
             Load more — {list.length - placed} left
           </button>
         )}
-        <a href={profile.gallery} target="_blank" rel="noreferrer" className="font-mono text-[11px] tracking-[0.2em] text-mute uppercase hover:text-bone">
-          Client gallery on Pixieset ↗
-        </a>
+        <div className="flex flex-col items-center gap-3 font-mono text-[11px] tracking-[0.2em] text-mute uppercase sm:flex-row sm:gap-8">
+          <a href={profile.driveArchive} target="_blank" rel="noreferrer" className="hover:text-bone">
+            More work on Google Drive ↗
+          </a>
+          <a href={profile.gallery} target="_blank" rel="noreferrer" className="hover:text-bone">
+            Client gallery on Pixieset ↗
+          </a>
+        </div>
       </div>
 
       {open && createPortal(<Viewer list={open.list} index={open.index} onClose={close} onStep={step} />, document.body)}

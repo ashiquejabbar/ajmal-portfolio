@@ -11,6 +11,7 @@ export const profile = {
   whatsapp: "https://wa.me/971543805484",
   email: "ajmalyaseen3214@gmail.com",
   gallery: "https://chutneyroll.pixieset.com/chutneyandroll/",
+  driveArchive: "https://drive.google.com/drive/folders/1tGmHzH7MYDXeOqKCYenGk5MOZiOZO4Cr", // all work, incl. uploads not yet on the site
   resume: "/Ajmal-Yaseen-Resume.pdf",
   portrait: "/img/ajmal.webp", // 900w — jpeg kept for link previews (layout.tsx)
   portraitSm: "/img/ajmal-600.webp",

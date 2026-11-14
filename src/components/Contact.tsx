@@ -122,9 +122,14 @@ export default function Contact() {
 
       <div className="mt-6 flex flex-col gap-4 font-mono text-[10px] tracking-[0.2em] text-mute uppercase sm:flex-row sm:items-center sm:justify-between">
         <span>© 2026 Ajmal Yaseen — {profile.location}</span>
-        <a href={profile.gallery} target="_blank" rel="noreferrer" className="hover:text-bone">
-          Photo gallery ↗
-        </a>
+        <span className="flex flex-wrap gap-x-6 gap-y-2">
+          <a href={profile.driveArchive} target="_blank" rel="noreferrer" className="hover:text-bone">
+            All work on Drive ↗
+          </a>
+          <a href={profile.gallery} target="_blank" rel="noreferrer" className="hover:text-bone">
+            Photo gallery ↗
+          </a>
+        </span>
         <button onClick={() => scrollToTarget(lenis, 0)} className="text-left uppercase hover:text-bone sm:text-right">
           Back to top ↑
         </button>
