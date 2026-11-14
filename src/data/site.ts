@@ -70,7 +70,7 @@ export const projects: Project[] = [
     category: "Lifestyle · Yacht Shoot",
     blurb: "Golden-hour yacht shoot against the Dubai skyline — wind, water and movement for a client's feed.",
     tone: ["#1b2a30", "#08090a"],
-    image: "/work/fitness/anam-client-card.webp",
+    image: "/work/fitness/anam-client-cover.webp", // hand-picked frame (18.6 s), 4:5 crop
     video: "/work/fitness/anam-client-preview.mp4",
     work: "fitness/anam-client",
   },
