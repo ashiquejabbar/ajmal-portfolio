@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef } from "react";
-import { gsap, prefersReducedMotion, useGSAP } from "@/lib/gsap";
+import { gsap, prefersReducedMotion, ScrollTrigger, useGSAP } from "@/lib/gsap";
 import { profile, projects, type Project } from "@/data/site";
 import { openWork, works } from "@/data/works";
 import { scrollToTarget, useLenis } from "./SmoothScroll";
@@ -164,14 +164,24 @@ export default function Work() {
       mm.add("(min-width: 768px) and (prefers-reduced-motion: no-preference)", () => {
         const el = track.current!;
         const distance = () => el.scrollWidth - window.innerWidth;
+        // Hold the row still for a while after it pins, so the lead reel (card 01) is actually seen
+        // before the sideways scroll starts — otherwise it slides away the moment you arrive.
+        const hold = () => window.innerHeight * 0.6;
+        const pinST = ScrollTrigger.create({
+          trigger: root.current,
+          start: "top top",
+          end: () => `+=${hold() + distance()}`,
+          pin: true,
+          invalidateOnRefresh: true,
+        });
+        // absolute scroll positions taken from the pin (refreshed first, as it's created first) —
+        // a relative "top top-=…" on the pinned section itself gets shifted by its own pin spacing
         const tween = gsap.to(el, {
           x: () => -distance(),
           ease: "none",
           scrollTrigger: {
-            trigger: root.current,
-            start: "top top",
-            end: () => `+=${distance()}`,
-            pin: true,
+            start: () => pinST.start + hold(),
+            end: () => pinST.start + hold() + distance(),
             scrub: 0.8,
             invalidateOnRefresh: true,
             onUpdate: (self) => gsap.set(".work-progress", { scaleX: self.progress }),
