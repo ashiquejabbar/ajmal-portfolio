@@ -36,6 +36,16 @@ export type Project = {
 export const projects: Project[] = [
   {
     id: "01",
+    title: "Anam",
+    category: "Lifestyle · Yacht Shoot",
+    blurb: "Golden-hour yacht shoot against the Dubai skyline — wind, water and movement for a client's feed.",
+    tone: ["#1b2a30", "#08090a"],
+    image: "/work/fitness/anam-client-card.webp",
+    video: "/work/fitness/anam-client-preview.mp4",
+    work: "fitness/anam-client",
+  },
+  {
+    id: "02",
     title: "Joy Alukkas",
     category: "Jewellery · Brilliance Diamond Show",
     blurb: "Event film for Joy Alukkas' Brilliance diamond jewellery show — the showroom, the collections, the guests and the team.",
@@ -45,7 +55,7 @@ export const projects: Project[] = [
     work: "jewellery/11123",
   },
   {
-    id: "02",
+    id: "03",
     title: "Damac Chelsea",
     category: "Real Estate · Meridian Properties",
     blurb: "Presenter-led walkthrough of a luxury Dubai home — price, payment plan and lifestyle in under a minute.",
@@ -55,7 +65,7 @@ export const projects: Project[] = [
     work: "real-estate/damac-chelsea",
   },
   {
-    id: "03",
+    id: "04",
     title: "Chutney & Roll",
     category: "Food & Beverage · Event Reel",
     blurb: "Guest-night reel for a Dubai restaurant — the buffet, the room and real reactions from the table.",
@@ -65,7 +75,7 @@ export const projects: Project[] = [
     work: "fnb/reel",
   },
   {
-    id: "04",
+    id: "05",
     title: "PM Sports",
     category: "Fitness · Brand Story",
     blurb: "Moody gym film for a sportswear brand — product details, training and the “inspired by champions” line.",
@@ -73,16 +83,6 @@ export const projects: Project[] = [
     image: "/work/fitness/pm-sports-card.webp",
     video: "/work/fitness/pm-sports-preview.mp4",
     work: "fitness/pm-sports",
-  },
-  {
-    id: "05",
-    title: "Anam",
-    category: "Lifestyle · Yacht Shoot",
-    blurb: "Golden-hour yacht shoot against the Dubai skyline — wind, water and movement for a client's feed.",
-    tone: ["#1b2a30", "#08090a"],
-    image: "/work/fitness/anam-client-card.webp",
-    video: "/work/fitness/anam-client-preview.mp4",
-    work: "fitness/anam-client",
   },
   {
     id: "06",
